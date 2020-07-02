@@ -7,6 +7,8 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <math.h>
+#include <float.h>
 #include "helper_functions.h"
 
 using std::string;
@@ -93,14 +95,26 @@ void ParticleFilter::prediction(double delta_t, double std[],
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
                                      vector<LandmarkObs>& observations) {
   /**
-   * TODO: Find the predicted measurement that is closest to each 
+   * Find the predicted measurement that is closest to each 
    *   observed measurement and assign the observed measurement to this 
    *   particular landmark.
-   * NOTE: this method will NOT be called by the grading code. But you will 
-   *   probably find it useful to implement this method and use it as a helper 
-   *   during the updateWeights phase.
    */
-
+  for (int i = 0; i < observations.size(); i++)
+  {
+    double minDist = DBL_MAX; //init to really large number
+    int mapId = -1; //initializing the id
+    for (int j = 0; j < predicted.size(); j++)
+    {
+      double distance = pow(observations[i].x - predicted[j].x, 2) + 
+                        pow(observations[i].y - predicted[j].y, 2);
+      if (distance < minDist)
+      {
+        minDist = distance;
+        mapId = predicted[j].id;
+      }
+    observations[i].id = mapId; //updating observation based on min prediction
+    }
+  }
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
