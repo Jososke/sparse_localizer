@@ -13,23 +13,24 @@ using std::string;
 using std::vector;
 using std::normal_distribution;
 
+  //Sample from these normal distributions like this: 
+  //   sample_x = dist_x(gen);
+  //   where "gen" is the random engine initialized here
+  std::default_random_engine gen;
+
+
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
-   * TODO: Set the number of particles. Initialize all particles to 
+   * Set the number of particles. Initialize all particles to 
    *   first position (based on estimates of x, y, theta and their uncertainties
    *   from GPS) and all weights to 1. 
-   * TODO: Add random Gaussian noise to each particle.
+   * Add random Gaussian noise to each particle.
    * NOTE: Consult particle_filter.h for more information about this method 
    *   (and others in this file).
    */
   num_particles = 100;  // TODO: Set the number of particles
 
   if (is_initialized) return;
-
-  //Sample from these normal distributions like this: 
-  //   sample_x = dist_x(gen);
-  //   where "gen" is the random engine initialized here
-  std::default_random_engine gen;
 
   // This line creates a normal (Gaussian) distribution for x
   normal_distribution<double> dist_x(x, std[0]);
@@ -52,15 +53,40 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   is_initialized = true;
 }
 
-void ParticleFilter::prediction(double delta_t, double std_pos[], 
+void ParticleFilter::prediction(double delta_t, double std[], 
                                 double velocity, double yaw_rate) {
   /**
-   * TODO: Add measurements to each particle and add random Gaussian noise.
+   * Add measurements to each particle and add random Gaussian noise.
    * NOTE: When adding noise you may find std::normal_distribution 
    *   and std::default_random_engine useful.
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+  // Creating Gaussian distributions
+  normal_distribution<double> dist_x(0, std[0]);
+  normal_distribution<double> dist_y(0, std[1]);
+  normal_distribution<double> dist_theta(0, std[2]);
+
+  for (int i = 0; i < num_particles; i++)
+  {
+    //Add measurements to each particle
+    if (yaw_rate < .0001) //when yaw is near 0
+    {
+      particles[i].x += velocity * delta_t * cos(particles[i].theta);
+      particles[i].y += velocity * delta_t * sin(particles[i].theta);
+    }
+    else
+    {
+      particles[i].x += velocity / yaw_rate * (sin(particles[i].theta + yaw_rate * delta_t) - sin(particles[i].theta));
+      particles[i].y += velocity / yaw_rate * (cos(particles[i].theta) - cos(particles[i].theta + yaw_rate * delta_t));
+      particles[i].theta += yaw_rate * delta_t;
+    }
+    
+    //adding random Gaussian noise
+    particles[i].x += dist_x(gen);
+    particles[i].y += dist_y(gen);
+    particles[i].theta += dist_theta(gen);
+  }
 
 }
 
