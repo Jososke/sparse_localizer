@@ -10,7 +10,7 @@
             ],
             "defines": [],
             "macFrameworkPath": [],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "/usr/bin/g++",
             "intelliSenseMode": "clang-x64"
         }
     ],
