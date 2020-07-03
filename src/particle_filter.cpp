@@ -176,8 +176,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         }
       double x_obs = curObs.x, y_obs = curObs.y;
       //set the weight using the multivariate gaussian function (normalized)
-      particles[i].weight *= multiv_prob(std_landmark[0], std_landmark[1], 
-                                          x_obs, y_obs, mu_x, mu_y);
+      double weight = multiv_prob(std_landmark[0], std_landmark[1], x_obs, y_obs, mu_x, mu_y);
+      weight == 0 ? particles[i].weight *= 0.00001 : particles[i].weight *= weight;
     }
   }
 }
