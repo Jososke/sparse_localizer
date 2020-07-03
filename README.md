@@ -1,16 +1,13 @@
-# Overview
-This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
+# Sparse Localizer
 
-#### Submission
-All you will need to submit is your `src` directory. You should probably do a `git pull` before submitting to verify that your project passes the most up-to-date version of the grading code (there are some parameters in `src/main.cpp` which govern the requirements on accuracy and run time).
+Project premise: Your robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
 
-## Project Introduction
-Your robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
-
-In this project you will implement a 2 dimensional particle filter in C++. Your particle filter will be given a map and some initial localization information (analogous to what a GPS would provide). At each time step your filter will also get observation and control data.
+This project implements a 2 dimensional particle filter in C++. The particle filter will be given a map and some initial localization information (analogous to what a GPS would provide). At each time step the filter will also get observation and control data.
 
 ## Running the Code
-This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)
+Download the simulator and open it. In the main menu screen select Project 3: Kidnapped Vehicle. The simulator can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)
+
+Once the scene is loaded you can hit the START button to observe how the car drives and observes landmarks. At any time you can press the PAUSE button, to pause the scene or hit the RESTART button to reset the scene. Also the ARROW KEYS can be used to move the camera around, and the top left ZOOM IN/OUT buttons can be used to focus the camera. Pressing the ESCAPE KEY returns to the simulator main menu.
 
 This repository includes two files that can be used to set up and install uWebSocketIO for either Linux or Mac systems. For windows you can use either Docker, VMware, or even Windows 10 Bash on Ubuntu to install uWebSocketIO.
 
@@ -27,12 +24,6 @@ Alternatively some scripts have been included to streamline this process, these 
 1. ./clean.sh
 2. ./build.sh
 3. ./run.sh
-
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-
-Note that the programs that need to be written to accomplish the project are src/particle_filter.cpp, and particle_filter.h
-
-The program main.cpp has already been filled out, but feel free to modify it.
 
 Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
 
@@ -81,13 +72,6 @@ OUTPUT: values provided by the c++ program to the simulator
 
 ["best_particle_sense_y"] <= list of sensed y positions
 
-
-Your job is to build out the methods in `particle_filter.cpp` until the simulator output says:
-
-```
-Success! Your particle filter passed!
-```
-
 # Implementing the Particle Filter
 The directory structure of this repository is as follows:
 
@@ -112,10 +96,6 @@ root
     |   particle_filter.h
 ```
 
-The only file you should modify is `particle_filter.cpp` in the `src` directory. The file contains the scaffolding of a `ParticleFilter` class and some associated methods. Read through the code, the comments, and the header file `particle_filter.h` to get a sense for what this code is expected to do.
-
-If you are interested, take a look at `src/main.cpp` as well. This file contains the code that will actually be running your particle filter and calling the associated methods.
-
 ## Inputs to the Particle Filter
 You can find the inputs to the particle filter in the `data` directory.
 
@@ -129,15 +109,43 @@ You can find the inputs to the particle filter in the `data` directory.
 
 > * Map data provided by 3D Mapping Solutions GmbH.
 
-## Success Criteria
-If your particle filter passes the current grading code in the simulator (you can make sure you have the current version at any time by doing a `git pull`), then you should pass!
+## Project Results
 
-The things the grading code is looking for are:
+This project implements a 2 dimensional particle filter in C++. The project uses a sparse localization method to determinet the vehicle location. The main functions were implemented in particle_filter.cpp and include:
 
+#### ParticleFilter::init
+Sets the number of particles. Initializes all particles to first position (based on estimates of x, y, theta and their uncertainties from GPS) and all weights to 1. Adds random Gaussian noise to each particle.
 
-1. **Accuracy**: your particle filter should localize vehicle position and yaw to within the values specified in the parameters `max_translation_error` and `max_yaw_error` in `src/main.cpp`.
+number of particles chosen to run in under 100 seconds was 100 particles - found empirically.
 
-2. **Performance**: your particle filter should complete execution within the time of 100 seconds.
+#### ParticleFilter::prediction 
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Adds measurements to each particle and add random Gaussian noise.
+
+#### ParticleFilter::dataAssociation
+
+Finds the predicted measurement that is closest to each observed measurement and assign the observed measurement to this particular landmark.
+
+#### ParticleFilter::updateWeights
+
+Updates the weights of each particle using a mult-variate Gaussian distribution. The observations are given in the VEHICLE'S coordinate system. The particles are located according to the MAP'S coordinate system. There was a homogeneous transform between the two systems.This transformation required both rotation AND translation (but no scaling).
+
+#### ParticleFilter::resample
+
+Resamples the particles with replacement with probability proportional to their weight using a resample wheel method. 
+
+#### Simulation
+
+The particle filter connects to the simulation using the web socket. After connection the following image is seen in the simulation.
+
+![alt text](./images/start.png)
+
+Once the simulation is started with the particle filter the car localizes itself based on the observed landmarks.
+
+![alt text](./images/during.png)
+
+The particle filter localize the vehicle to within the desired accuracy.
+The particle filter runs within the specified time of 100 seconds.
+
+![alt text](./images/success.png)
+
