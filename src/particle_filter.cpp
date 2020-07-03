@@ -68,7 +68,7 @@ void ParticleFilter::prediction(double delta_t, double std[],
   for (int i = 0; i < num_particles; i++)
   {
     //Add measurements to each particle
-    if (yaw_rate < .0001) //when yaw is near 0
+    if (fabs(yaw_rate) < .0001) //when yaw is near 0
     {
       particles[i].x += velocity * delta_t * cos(particles[i].theta);
       particles[i].y += velocity * delta_t * sin(particles[i].theta);
@@ -109,8 +109,8 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
         minDist = distance;
         mapId = predicted[j].id;
       }
-    observations[i].id = mapId; //updating observation based on min prediction
     }
+    observations[i].id = mapId; //updating observation based on min prediction
   }
 }
 
