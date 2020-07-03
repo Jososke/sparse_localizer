@@ -172,7 +172,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         {
           mu_x = curPred.x;
           mu_y = curPred.y;
-          break;
+          break; //exit for loop
         }
       double x_obs = curObs.x, y_obs = curObs.y;
       //set the weight using the multivariate gaussian function (normalized)
@@ -201,7 +201,7 @@ void ParticleFilter::resample() {
   // random distribution for beta 
   std::uniform_real_distribution<double> distReal(0.0, maxWeight);
   // random integer distribution for resampling wheel
-  std::uniform_int_distribution<int> distInt(0, num_particles - 1);
+  std::uniform_int_distribution<int> distInt(0, num_particles-1);
 
   // index of resample wheel
   int index = distInt(gen);
@@ -210,17 +210,17 @@ void ParticleFilter::resample() {
 
   // resample wheel
   vector<Particle> newParticles;
-  for(int i = 0; i < num_particles; i++) {
+  for(int i = 0; i < num_particles; i++) 
+  {
     beta += distReal(gen) * 2.0;
-    while( beta > weights[index]) {
+    while(beta > weights[index]) 
+    {
       beta -= weights[index];
-      index = (index + 1) % num_particles;
+      index = (index+1)%num_particles;
     }
     newParticles.push_back(particles[index]);
   }
-
-  //saving the newParticles 
-  particles = newParticles;
+  particles = newParticles; //saving the newParticles 
 }
 
 void ParticleFilter::SetAssociations(Particle& particle, 
